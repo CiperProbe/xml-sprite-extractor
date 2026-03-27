@@ -1,5 +1,7 @@
 A Python script that parses Adobe Animate XML files to extract, offset, and save specific SubTextures from sprite sheets as standalone transparent PNG files.
 
+Put your desired .xml and .png in "Imported" and use the commands below.
+
 Commands:
 
 List all available sprites
