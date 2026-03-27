@@ -36,6 +36,9 @@ class SpriteSheetExtractor:
         self.sprite_sheet_path = Path(sprite_sheet_path)
         self.subtextures: Dict[str, SubTexture] = {}
         self.sprite_sheet: Optional[Image.Image] = None
+    
+    def _sanitize_filename(self, name: str) -> str:
+        return name.replace(" ", "_")
         
     def load_xml(self) -> None:
         if not self.xml_path.exists():
@@ -163,7 +166,8 @@ class SpriteSheetExtractor:
         output_dir.mkdir(parents=True, exist_ok=True)
         
         for texture_name in self.subtextures:
-            output_path = output_dir / f"{texture_name}.png"
+            sanitized_name = self._sanitize_filename(texture_name)
+            output_path = output_dir / f"{sanitized_name}.png"
             try:
                 self.save_subtexture(texture_name, output_path, offset_x, offset_y)
             except Exception as e:
@@ -238,7 +242,8 @@ Examples:
         parser.error("Must specify --texture, --list, or --all")
     
     if args.texture and not args.output:
-        args.output = str(default_extracted_dir / f"{args.texture}.png")
+        sanitized_texture_name = args.texture.replace(" ", "_")
+        args.output = str(default_extracted_dir / f"{sanitized_texture_name}.png")
     
     if args.all and not hasattr(args, 'all_dir'):
         args.all_dir = str(default_extracted_dir)
