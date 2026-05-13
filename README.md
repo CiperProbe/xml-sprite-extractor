@@ -6,17 +6,22 @@ Commands:
 
 List all available sprites
 ```bash
-python sprite_extractor.py -l
+py sprite_extractor.py -l
 ```
 
 Extract all sprites to extracted/ folder
 ```bash
-python sprite_extractor.py -a
+py sprite_extractor.py -a
+```
+
+Extract all sprites (sanitize filenames, no prompt)
+```bash
+py sprite_extractor.py -a --sanitize
 ```
 
 Extract specific sprite
 ```bash
-python sprite_extractor.py -t "player_walk" -o extracted/player_walk.png
+py sprite_extractor.py -t "player_walk" -o extracted/player_walk.png
 ```
 
 Command Options:
@@ -26,3 +31,4 @@ Command Options:
 - `-t "name"` : Extract specific sprite
 - `-o "path"` : Output file path
 - `--offset X Y` : Apply X,Y offset
+- `-s, --sanitize` : Replace spaces with underscores in output filenames (when used with `-a`, skips the prompt)

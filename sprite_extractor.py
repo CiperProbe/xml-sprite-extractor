@@ -161,13 +161,13 @@ class SpriteSheetExtractor:
         for name, subtexture in sorted(self.subtextures.items()):
             print(f"  {name}: {subtexture.width}x{subtexture.height} at ({subtexture.x}, {subtexture.y})")
     
-    def extract_all(self, output_dir: str, offset_x: int = 0, offset_y: int = 0) -> None:
+    def extract_all(self, output_dir: str, offset_x: int = 0, offset_y: int = 0, sanitize: bool = False) -> None:
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         
         for texture_name in self.subtextures:
-            sanitized_name = self._sanitize_filename(texture_name)
-            output_path = output_dir / f"{sanitized_name}.png"
+            output_name = self._sanitize_filename(texture_name) if sanitize else texture_name
+            output_path = output_dir / f"{output_name}.png"
             try:
                 self.save_subtexture(texture_name, output_path, offset_x, offset_y)
             except Exception as e:
@@ -201,6 +201,8 @@ Examples:
     parser.add_argument("-a", "--all", action="store_true", help="Extract all subtextures to directory")
     parser.add_argument("--offset", nargs=2, type=int, metavar=("X", "Y"), 
                        default=[0, 0], help="Offset to apply (X Y)")
+    parser.add_argument("-s", "--sanitize", action="store_true", default=None,
+                       help="Replace spaces with underscores in output filenames")
     
     args = parser.parse_args()
     
@@ -242,11 +244,22 @@ Examples:
         parser.error("Must specify --texture, --list, or --all")
     
     if args.texture and not args.output:
-        sanitized_texture_name = args.texture.replace(" ", "_")
-        args.output = str(default_extracted_dir / f"{sanitized_texture_name}.png")
+        args.output = str(default_extracted_dir / f"{args.texture}.png")
     
     if args.all and not hasattr(args, 'all_dir'):
         args.all_dir = str(default_extracted_dir)
+    
+    if args.all and args.sanitize is None:
+        while True:
+            response = input("Replace spaces with '_' in filenames? [Y/N]: ").strip().lower()
+            if response in ('y', 'yes'):
+                args.sanitize = True
+                break
+            elif response in ('n', 'no', ''):
+                args.sanitize = False
+                break
+    elif args.sanitize is None:
+        args.sanitize = False
     
     try:
         extractor = SpriteSheetExtractor(xml_file, sprite_file)
@@ -261,7 +274,7 @@ Examples:
                                    args.offset[0], args.offset[1])
         
         if args.all:
-            extractor.extract_all(args.all_dir, args.offset[0], args.offset[1])
+            extractor.extract_all(args.all_dir, args.offset[0], args.offset[1], args.sanitize)
             
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
