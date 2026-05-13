@@ -14,9 +14,9 @@ Extract all sprites to extracted/ folder
 py sprite_extractor.py -a
 ```
 
-Extract all sprites (sanitize filenames, no prompt)
+Extract all sprites (auto-yes to prompts)
 ```bash
-py sprite_extractor.py -a --sanitize
+py sprite_extractor.py -a -y
 ```
 
 Extract specific sprite
@@ -31,4 +31,4 @@ Command Options:
 - `-t "name"` : Extract specific sprite
 - `-o "path"` : Output file path
 - `--offset X Y` : Apply X,Y offset
-- `-s, --sanitize` : Replace spaces with underscores in output filenames (when used with `-a`, skips the prompt)
+- `-y, --yes` : Automatically answer yes to all prompts

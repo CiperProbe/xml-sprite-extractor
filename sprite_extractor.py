@@ -201,8 +201,8 @@ Examples:
     parser.add_argument("-a", "--all", action="store_true", help="Extract all subtextures to directory")
     parser.add_argument("--offset", nargs=2, type=int, metavar=("X", "Y"), 
                        default=[0, 0], help="Offset to apply (X Y)")
-    parser.add_argument("-s", "--sanitize", action="store_true", default=None,
-                       help="Replace spaces with underscores in output filenames")
+    parser.add_argument("-y", "--yes", action="store_true",
+                       help="Automatically answer yes to all prompts")
     
     args = parser.parse_args()
     
@@ -249,22 +249,28 @@ Examples:
     if args.all and not hasattr(args, 'all_dir'):
         args.all_dir = str(default_extracted_dir)
     
-    if args.all and args.sanitize is None:
-        while True:
-            response = input("Replace spaces with '_' in filenames? [Y/N]: ").strip().lower()
-            if response in ('y', 'yes'):
-                args.sanitize = True
-                break
-            elif response in ('n', 'no', ''):
-                args.sanitize = False
-                break
-    elif args.sanitize is None:
-        args.sanitize = False
-    
     try:
         extractor = SpriteSheetExtractor(xml_file, sprite_file)
         extractor.load_xml()
         extractor.load_sprite_sheet()
+        
+        if args.all:
+            has_spaces = any(" " in name for name in extractor.subtextures)
+            if args.yes:
+                sanitize = True
+            elif has_spaces:
+                while True:
+                    response = input("Replace spaces with '_' in filenames? [Y/N]: ").strip().lower()
+                    if response in ('y', 'yes'):
+                        sanitize = True
+                        break
+                    elif response in ('n', 'no', ''):
+                        sanitize = False
+                        break
+            else:
+                sanitize = False
+        else:
+            sanitize = False
         
         if args.list:
             extractor.list_subtextures()
@@ -274,7 +280,7 @@ Examples:
                                    args.offset[0], args.offset[1])
         
         if args.all:
-            extractor.extract_all(args.all_dir, args.offset[0], args.offset[1], args.sanitize)
+            extractor.extract_all(args.all_dir, args.offset[0], args.offset[1], sanitize)
             
     except Exception as e:
         print(f"Error: {e}", file=sys.stderr)
